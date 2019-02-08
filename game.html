@@ -1,0 +1,739 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>Megaman: Go!</title>
+    
+</head>
+<body style="background-color: black">
+    
+<center>
+    <img id="Logo" width="660" height="302" src="Logo1.png">
+</center>    
+    
+<section>
+
+<!-- This div is the canvas -->
+<div>
+<canvas id="canvas" style="position: absolute; border:5px solid #fff;">
+This text is displayed if your browser does not support HTML5 Canvas.
+</canvas>
+</div>  
+
+<script type="text/javascript">
+
+var Section = 1;    
+
+var ctx, controller, hero, dog, loop, background, highway;
+var hstatus, estatus, bstatus, enstatus;
+var mega, bass, sickomode;
+var energy;
+var ebots = [ {id:"ebot",x:675,y:385,w:120,h:120, estatus:1}, {id:"ebot2",x:1500,y:385,w:120,h:120, estatus:1}];
+var ebots2 = [ {id:"2ebot",x:2975,y:400,w:137,h:110, estatus:1}, {id:"2ebot2",x:3700,y:400,w:137,h:110, estatus:1}];
+var ebots3 = [ {id:"3ebot",x:4675,y:325,w:142,h:174, estatus:1}, {id:"3ebot2",x:5900,y:325,w:142,h:174, estatus:1}];
+var start;
+var score = 0;
+var gameStart = false;
+
+
+//Audio :)
+var audio = new Audio();
+audio.src ='stage1.mp3';
+var audio2 = new Audio();
+audio2.src ='bullet.mp3';
+    
+var shooting = false;
+
+
+ctx = document.querySelector("canvas").getContext("2d");
+
+ctx.canvas.height = 900;
+ctx.canvas.width = 1420;
+
+
+hero = {
+
+  height:100,
+  jumping:true,
+  width:100,
+  x:144, // center of the canvas
+  y:-800,
+  y_velocity:0,
+  hstatus:1
+
+};
+    
+dog = {
+
+  height:50,
+  width:100,
+  x:130,
+  y:445,
+  y_velocity:0    
+
+};
+    
+energy = {
+
+  height:60,
+  width:58,
+  x:3000,
+  y:150,
+  enstatus:1
+    
+};
+    
+background = {
+
+  width:20000,
+  height:800,
+  x:0, 
+  y:0
+
+};
+    
+background2 = {
+
+  width:20000,
+  height:800,
+  x:20000, 
+  y:0
+
+};
+    
+background3 = {
+
+  width:20000,
+  height:800,
+  x:40000, 
+  y:0
+
+};
+    
+background3 = {
+
+  width:20000,
+  height:800,
+  x:40000, 
+  y:0
+
+};
+
+background4 = {
+
+  width:20000,
+  height:800,
+  x:60000, 
+  y:0
+
+};
+
+background5 = {
+
+  width:20000,
+  height:800,
+  x:80000, 
+  y:0
+
+};
+    
+background6 = {
+
+  width:20000,
+  height:800,
+  x:100000, 
+  y:0
+
+};
+    
+background7 = {
+
+  width:20000,
+  height:800,
+  x:120000, 
+  y:0
+
+};
+    
+background8 = {
+
+  width:20000,
+  height:800,
+  x:140000, 
+  y:0
+
+};
+    
+background9 = {
+
+  width:20000,
+  height:800,
+  x:160000, 
+  y:0
+
+};
+    
+background10 = {
+
+  width:20000,
+  height:800,
+  x:180000, 
+  y:0
+
+};
+    
+highway = {
+
+  width:13000,
+  height:700,
+  x:0, 
+  y:115
+
+};
+    
+highway2 = {
+
+  width:13000,
+  height:700,
+  x:13000, 
+  y:115
+
+};
+    
+highway3 = {
+
+  width:13000,
+  height:700,
+  x:26000, 
+  y:115
+
+};
+    
+highway4 = {
+
+  width:13000,
+  height:700,
+  x:39000, 
+  y:115
+
+};
+    
+highway5 = {
+
+  width:13000,
+  height:700,
+  x:52000, 
+  y:115
+
+};
+    
+highway6 = {
+
+  width:13000,
+  height:700,
+  x:65000, 
+  y:115
+
+};
+    
+highway7 = {
+
+  width:13000,
+  height:700,
+  x:78000, 
+  y:115
+
+};
+    
+highway8 = {
+
+  width:13000,
+  height:700,
+  x:91000, 
+  y:115
+
+};
+    
+highway9 = {
+
+  width:13000,
+  height:700,
+  x:104000, 
+  y:115
+
+};
+    
+highway10 = {
+
+  width:13000,
+  height:700,
+  x:117000, 
+  y:115
+
+};
+
+var bullets = [ {id:"bullet", x: hero.x + 105, y: 420, w: 20, h: 15, bstatus:1}, {id:"bullet2", x: hero.x + 105, y: 420, w: 20, h: 15, bstatus:1}];
+
+
+controller = {
+
+    m:false,
+    b:false,
+    enter:false,
+    right:false,
+    up:false,
+    p:false,
+    keyListener:function(event) {
+
+    var key_state = (event.type == "keydown")?true:false;
+
+    switch(event.keyCode) {
+            
+        case 77:// m key - megaman
+            controller.m = key_state;
+        break;
+            
+        case 66:// b key - bass
+            controller.b = key_state;
+        break;
+
+        case 13:// enter key - select
+            controller.enter = key_state;
+        break;
+            
+        case 81:// q key - move by itself (lol)
+            controller.right = key_state;
+        break;
+
+        case 87:// up key - jump
+            controller.up = key_state;
+        break;
+
+        case 80://p - shoot
+            controller.p = key_state;
+            shooting = true;
+        break;
+
+    }
+
+  }
+
+};
+      
+function drawScore() {
+    ctx.font = "50px Press Start";
+    ctx.fillStyle = "#fff";
+    ctx.fillText("Score: "+ score, 900, 100);
+
+}
+
+    
+
+loop = function() {
+    
+  if (controller.enter) {
+
+        if (Section == 1) {
+            Section = 2;
+        }
+
+        if (Section == 2) {
+            Section = 3;
+        }
+ 
+  }
+        
+  if (controller.m) {
+
+        if (Section == 3) {
+            mega = true;
+            bass = false;
+            Section = 4;
+        }
+ 
+  }
+            
+    if (controller.b) {
+
+       if (Section == 3) {
+            mega = false;
+            bass = true;
+            Section = 4;
+        }
+  }
+    
+  if (controller.up && hero.jumping == false) {
+
+    hero.y_velocity -= 50;
+    hero.jumping = true;
+
+      
+  }
+    
+  if (controller.right == false && gameStart == true) {
+    
+    if (sickomode) {
+        
+        highway.x -= 9;
+        highway2.x -= 9;
+        highway3.x -= 9;
+        highway4.x -= 9;
+        highway5.x -= 9;
+        highway6.x -= 9;
+        highway7.x -= 9;
+        highway8.x -= 9;
+        highway9.x -= 9;
+        highway10.x -= 9;
+        background.x -= 4;
+        background2.x -= 4;
+        background3.x -= 4;
+        background4.x -= 4;
+        background5.x -= 4;
+        background6.x -= 4;
+        background7.x -= 4;
+        background8.x -= 4;
+        background9.x -= 4;
+        background10.x -= 4;
+        energy.x -= 10;
+    }
+      
+    else {
+        
+            highway.x -= 4;
+            highway2.x -= 4;
+            highway3.x -= 4;
+            highway4.x -= 4;
+            highway5.x -= 4;
+            highway6.x -= 4;
+            highway7.x -= 4;
+            highway8.x -= 4;
+            highway9.x -= 4;
+            highway10.x -= 4;
+            background.x -= 1;
+            background2.x -= 1;
+            background3.x -= 1;
+            background4.x -= 1;
+            background5.x -= 1;
+            background6.x -= 1;
+            background7.x -= 1;
+            background8.x -= 1;
+            background9.x -= 1;
+            background10.x -= 1;
+            energy.x -= 10;
+    }
+    
+    
+    for (var i = 0; i < ebots.length; i++) {
+        ebots[i].x -= 4;
+    }
+      
+    for (var i = 0; i < ebots2.length; i++) {
+        ebots2[i].x -= 4;
+    }
+      
+    for (var i = 0; i < ebots3.length; i++) {
+        ebots3[i].x -= 4;
+    }
+      
+  }
+
+  hero.y_velocity += 1.2;// gravity
+  
+  hero.y += hero.y_velocity;
+  hero.y_velocity *= 0.9;// friction
+
+  // if rectangle is falling below floor line
+  if (hero.y > 380) {
+
+      hero.jumping = false;
+      hero.y = 380;
+      hero.y_velocity = 0;
+
+  }
+    
+//startGame();
+    
+if (Section == 1) {
+      
+  var img = document.getElementById("Menu1");
+  ctx.drawImage(img, 0, 0, 1420, 800);
+    
+}
+    
+if (Section == 2) {
+      
+  var img = document.getElementById("Menu2");
+  ctx.drawImage(img, 0, 0, 1420, 800);
+    
+}
+    
+if (Section == 3) {
+      
+  var img = document.getElementById("Menu3");
+  ctx.drawImage(img, 0, 0, 1420, 800);
+    
+}
+            
+if (Section == 4) {
+      
+  startGame();
+            
+}
+
+    
+function bulletCollisionDetec () {
+    for (var b = 0; b < bullets.length; b++) {
+        for (var e = 0; e < ebots.length; e++) {
+            if (bullets[b].x >= ebots[e].x - 50 && bullets[b].x <= ebots[e].x + 50 && bullets[b].y > 415 && ebots[e].estatus == 1 && bullets[b].bstatus == 1) {
+                ebots[e].estatus = 0;
+                bullets[b].bstatus = 0;
+                score = score + 5;
+            }
+        }
+        
+    }
+    
+    for (var b = 0; b < bullets.length; b++) {
+        for (var e = 0; e < ebots2.length; e++) {
+            if (bullets[b].x >= ebots2[e].x - 50 && bullets[b].x <= ebots2[e].x + 50 && bullets[b].y > 415 && ebots2[e].estatus == 1 && bullets[b].bstatus == 1) {
+                ebots2[e].estatus = 0;
+                bullets[b].bstatus = 0;
+                score = score + 5;
+            }
+        }
+        
+    }
+    
+    for (var b = 0; b < bullets.length; b++) {
+        for (var e = 0; e < ebots3.length; e++) {
+            if (bullets[b].x >= ebots3[e].x - 50 && bullets[b].x <= ebots3[e].x + 50 && bullets[b].y > 415 && ebots3[e].estatus == 1 && bullets[b].bstatus == 1) {
+                ebots3[e].estatus = 0;
+                bullets[b].bstatus = 0;
+                score = score + 5;
+            }
+        }
+        
+    }
+}
+    
+function badguyCollisionDetec () {
+
+        if (sickomode) {
+            for (var e = 0; e < ebots.length; e++) {
+            if (hero.x >= ebots[e].x - 50 && hero.x <= ebots[e].x + 50 && ebots[e].estatus == 1 && hero.hstatus == 1) {
+                ebots[e].estatus = 0;
+                score = score + 5;
+            }
+          } 
+        }
+    
+        else {
+           for (var e = 0; e < ebots.length; e++) {
+            if (hero.x >= ebots[e].x - 50 && hero.x <= ebots[e].x + 50 && ebots[e].estatus == 1 && hero.hstatus == 1) {
+                ebots[e].estatus = 0;
+                mega = false;
+                bass = false;
+                gameOver();
+            }
+          }  
+        }
+    
+        if (sickomode) {
+            for (var e = 0; e < ebots.length; e++) {
+            if (hero.x >= ebots2[e].x - 50 && hero.x <= ebots2[e].x + 50 && ebots2[e].estatus == 1 && hero.hstatus == 1) {
+                ebots2[e].estatus = 0;
+                score = score + 5;
+            }
+          } 
+        }
+    
+        else {
+           for (var e = 0; e < ebots.length; e++) {
+            if (hero.x >= ebots2[e].x - 50 && hero.x <= ebots2[e].x + 50 && ebots2[e].estatus == 1 && hero.hstatus == 1) {
+                ebots2[e].estatus = 0;
+                mega = false;
+                bass = false;
+                gameOver();
+            }
+          }  
+        }
+    
+        if (sickomode) {
+            for (var e = 0; e < ebots.length; e++) {
+            if (hero.x >= ebots3[e].x - 50 && hero.x <= ebots3[e].x + 50 && ebots3[e].estatus == 1 && hero.hstatus == 1) {
+                ebots3[e].estatus = 0;
+                score = score + 5;
+            }
+          } 
+        }
+    
+        else {
+           for (var e = 0; e < ebots.length; e++) {
+            if (hero.x >= ebots3[e].x - 50 && hero.x <= ebots3[e].x + 50 && ebots3[e].estatus == 1 && hero.hstatus == 1) {
+                ebots3[e].estatus = 0;
+                mega = false;
+                bass = false;
+                gameOver();
+            }
+          }  
+        }
+        
+}
+    
+function energyCollisionDetec () {
+
+        if (hero.x >= energy.x && hero.x <= energy.x + 50 && energy.enstatus == 1 && hero.hstatus == 1) {
+                sickomode = true;
+        }
+        
+}
+
+function startGame() {
+    
+  if (hero.hstatus == 0) {
+      var img = document.getElementById("MegaDead");
+      ctx.drawImage(img, hero.x, hero.y, hero.width, hero.height);
+      setTimeout(gameOver, 3000);
+  }
+    
+  gameStart = true;
+  bulletCollisionDetec();
+  badguyCollisionDetec();
+  energyCollisionDetec();
+  audio.play();
+
+  //Background + Highway(s)
+  var img = document.getElementById("Background");
+  ctx.drawImage(img, background.x, background.y, background.width, background.height);
+    
+  var img = document.getElementById("Highway");
+  ctx.drawImage(img, highway.x, highway.y, highway.width, highway.height);
+
+    
+  //Megaman + Rush OR Bass + Treble
+  if (mega) {
+      if (sickomode) {
+          var img = document.getElementById("SuperMega");
+          ctx.drawImage(img, hero.x, hero.y, hero.width, hero.height);
+      } 
+      
+      else {
+          var img = document.getElementById("MegaShot");
+          ctx.drawImage(img, hero.x, hero.y, hero.width, hero.height);
+          var img = document.getElementById("Rush");
+          ctx.drawImage(img, dog.x, dog.y, dog.width, dog.height);
+      }
+  }
+
+  if (bass) {
+      if (sickomode) {
+          var img = document.getElementById("SuperBass");
+          ctx.drawImage(img, hero.x, hero.y - 20, hero.width, hero.height + 30);
+      } 
+      
+      else {
+          var img = document.getElementById("Bass");
+          ctx.drawImage(img, hero.x + 10, hero.y - 20, hero.width + 30, hero.height + 20);
+          var img = document.getElementById("Treble");
+          ctx.drawImage(img, dog.x, dog.y - 20, dog.width + 40, dog.height + 20);
+      }
+      
+  }
+   
+  //Ebots
+  for (var i = 0; i < ebots.length; i++) {
+      if (ebots[i].estatus == 1) {
+          var img = document.getElementById("EnemyBot");
+          ctx.drawImage(img, ebots[i].x, ebots[i].y, ebots[i].w, ebots[i].h);
+      }
+  }
+    
+  for (var i = 0; i < ebots2.length; i++) {
+      if (ebots2[i].estatus == 1) {
+          var img = document.getElementById("EnemyBot2");
+          ctx.drawImage(img, ebots2[i].x, ebots2[i].y, ebots2[i].w, ebots2[i].h);
+      }
+  }
+    
+  for (var i = 0; i < ebots3.length; i++) {
+      if (ebots3[i].estatus == 1) {
+          var img = document.getElementById("EnemyBot3");
+          ctx.drawImage(img, ebots3[i].x, ebots3[i].y, ebots3[i].w, ebots3[i].h);
+      }
+  }
+    
+  
+  //Bullets    
+  if (shooting) {
+      for (var i = 0; i < bullets.length; i++) {
+          if (ebots[i].estatus == 1){
+              
+              if (bullets[i].x > 1300) {
+                ctx.clearRect(bullets[i].x, bullets[i].y, bullets[i].w, bullets[i].h);
+              }
+
+              audio2.play();
+              var img = document.getElementById("Bullet");
+              bullets[i].x += 15;
+              ctx.drawImage(img, bullets[i].x, bullets[i].y, bullets[i].w, bullets[i].h);
+          }
+      }
+      
+  }
+    
+  //Energy
+  var img = document.getElementById("Energy");
+  ctx.drawImage(img, energy.x, energy.y, energy.width, energy.height);
+    
+  
+  drawScore();
+
+}
+    
+    
+function gameOver() {
+    
+    var img = document.getElementById("Death");
+    ctx.drawImage(img, 144, 380, 150, 150);
+}
+
+ 
+  // call update when the browser is ready to draw again
+  window.requestAnimationFrame(loop);
+
+};
+
+window.addEventListener("keydown", controller.keyListener)
+window.addEventListener("keyup", controller.keyListener);
+window.requestAnimationFrame(loop);
+    
+  
+
+</script>
+</section>
+    
+    <img id="Menu1" width="10" height="10" src="Menu1.png" style="display: none;">
+    <img id="Menu2" width="10" height="10" src="Menu2-3.png" style="display: none;">
+    <img id="Menu3" width="10" height="10" src="Menu3.png" style="display: none;">
+    
+    <img id="Background" width="10" height="10" src="Background3.jpg" style="display: none;">
+    <img id="Highway" width="10" height="10" src="Highway3.png" style="display: none;">
+    
+    <img id="MegaShot" width="10" height="10" src="MegaShot.png" style="display: none;">
+    <img id="Rush" width="10" height="10" src="Rush.png" style="display: none;">
+    <img id="SuperMega" width="10" height="10" src="MSuper.png" style="display: none;">
+    
+    <img id="Bass" width="10" height="10" src="Bass1.png" style="display: none;">
+    <img id="Treble" width="10" height="10" src="Treble.png" style="display: none;">
+    <img id="SuperBass" width="10" height="10" src="SuperBass.png" style="display: none;">
+
+    <img id="Death" width="10" height="10" src="Death.png" style="display: none;">
+    <img id="EnemyBot" width="10" height="10" src="MEnemy.png" style="display: none;">
+    <img id="EnemyBot2" width="10" height="10" src="Enemy2.png" style="display: none;">
+    <img id="EnemyBot3" width="10" height="10" src="Enemy3.png" style="display: none;">
+    
+    <img id="Bullet" width="10" height="10" src="Bullet.png" style="display: none;">
+    <img id="Energy" width="10" height="10" src="Energy.png" style="display: none;">
+    
+</body>
+</html>

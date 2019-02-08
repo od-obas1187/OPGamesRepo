@@ -1,0 +1,273 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>Megaman: Go!</title>
+    
+</head>
+<body style="background-color: black">
+    
+<center>
+    <img id="Logo" width="660" height="302" src="Logo1.png">
+</center>    
+    
+<section>
+
+<!-- This div is the canvas -->
+<div>
+<canvas id="canvas" style="position: absolute; border:5px solid #fff;">
+This text is displayed if your browser does not support HTML5 Canvas.
+</canvas>
+</div>  
+
+<script type="text/javascript">
+
+var Section = 1;    
+
+var ctx, controller, mega, loop, background, highway;
+var estatus, bstatus;
+var ebots = [ {id:"ebot",x:675,y:405,w:100,h:100, estatus:1}, {id:"ebot2",x:1100,y:405,w:100,h:100, estatus:1}];
+var start;
+var score = 0;
+var gameStart = false;
+
+
+//Audio :)
+var audio = new Audio();
+audio.src ='stage1.mp3';
+var audio2 = new Audio();
+audio2.src ='bullet.mp3';
+    
+var shooting = false;
+
+
+ctx = document.querySelector("canvas").getContext("2d");
+
+ctx.canvas.height = 800;
+ctx.canvas.width = 1420;
+
+
+mega = {
+
+  height:100,
+  jumping:true,
+  width:100,
+  x:144, // center of the canvas
+  y:425,
+  y_velocity:0    
+
+};
+    
+background = {
+
+  width:20000,
+  height:800,
+  x:0, 
+  y:0
+
+};
+    
+highway = {
+
+  width:13000,
+  height:700,
+  x:0, 
+  y:115
+
+};
+
+var bullets = [ {id:"bullet", x: mega.x + 105, y: mega.y + 40, w: 5, h: 5, bstatus:1}];
+
+
+controller = {
+
+    right:false,
+    up:false,
+    p: false,
+    keyListener:function(event) {
+
+    var key_state = (event.type == "keydown")?true:false;
+
+    switch(event.keyCode) {
+
+            
+        case 81:// q key - move by itself (lol)
+            controller.right = key_state;
+        break;
+
+        case 87:// up key - jump
+            controller.up = key_state;
+        break;
+
+        case 80://p - shoot
+            controller.p = key_state;
+            shooting = true;
+        break;
+
+    }
+
+  }
+
+};
+      
+function drawScore() {
+    ctx.font = "50px Press Start";
+    ctx.fillStyle = "#fff";
+    ctx.fillText("Score: "+ score, 900, 100);
+
+}
+
+    
+
+loop = function() {
+    
+  if (controller.up && mega.jumping == false) {
+
+    mega.y_velocity -= 50;
+    mega.jumping = true;
+
+      
+  }
+    
+  if (controller.right == false && gameStart == true) {
+
+    highway.x -= 4;
+    background.x -= 1;
+    
+    for (var i = 0; i < ebots.length; i++) {
+        ebots[i].x -= 4;
+    }
+      
+  }
+
+  mega.y_velocity += 1.2;// gravity
+  
+  mega.y += mega.y_velocity;
+  mega.y_velocity *= 0.9;// friction
+
+  // if rectangle is falling below floor line
+  if (mega.y > 420 && mega.x < 500) {
+
+      mega.jumping = false;
+      mega.y = 420;
+      mega.y_velocity = 0;
+
+  }
+    
+startGame();
+    
+/*if (Section == 1) {
+      
+  var img = document.getElementById("Menu1");
+  ctx.drawImage(img, 0, 0, 1420, 800);
+    
+  //wait 5 seconds
+  setTimeout(startScreen, 3000);
+    
+}
+    
+function startScreen() { //Keeps repeating this until stopping.
+   
+  Section = 2;
+  var img = document.getElementById("Menu2");
+  ctx.drawImage(img, 0, 0, 1420, 800);
+    
+  //wait 3 seconds
+  setTimeout(startGame, 3000);
+    
+}*/
+    
+function collisionDetec () {
+    for (var b = 0; b < bullets.length; b++) {
+        for (var e = 0; e < ebots.length; e++) {
+            if (bullets[b].x >= ebots[e].x - 50 && bullets[b].x <= ebots[e].x + 50 && bullets[b].y == 465 && ebots[e].estatus == 1 && bullets[b].bstatus == 1) {
+                ebots[e].estatus = 0;
+                bullets[b].bstatus = 0;
+                score ++;
+            }
+        }
+        
+    }
+}
+
+function startGame() {
+    
+  gameStart = true;
+  collisionDetec();
+  audio.play();
+
+  //Background + Highway(s)
+  var img = document.getElementById("Background");
+  ctx.drawImage(img, background.x, background.y, background.width, background.height);
+    
+  var img = document.getElementById("Highway");
+  ctx.drawImage(img, highway.x, highway.y, highway.width, highway.height);
+
+    
+  //Megaman
+  ctx.fillStyle = "#8DFCFF"; // light blue
+  ctx.fillRect (mega.x, 0, 100, 520);
+  var img = document.getElementById("MegaShot");
+  ctx.drawImage(img, mega.x, mega.y, mega.width, mega.height);
+    
+    
+  //Ebots
+  for (var i = 0; i < ebots.length; i++) {
+      if (ebots[i].estatus == 1) {
+          var img = document.getElementById("EnemyBot");
+          ctx.drawImage(img, ebots[i].x, ebots[i].y, ebots[i].w, ebots[i].h);
+      }
+  }
+    
+  
+  //Bullets    
+  if (shooting) {
+      for (var i = 0; i < bullets.length; i++) {
+          if (ebots[i].estatus == 1){
+              
+              if (bullets[i].x > 1300) {
+                ctx.clearRect(bullets[i].x, bullets[i].y, bullets[i].w, bullets[i].h);
+              }
+
+              ctx.fillStyle = "#8DFCFF"; // light blue
+              ctx.beginPath();
+              bullets[i].x += 15;
+              ctx.arc(bullets[i].x, bullets[i].y, 5, 0, 2 * Math.PI);
+              ctx.fill();
+              audio2.play();
+          }
+      }
+      
+  }
+    
+  
+  drawScore();
+
+}
+ 
+  // call update when the browser is ready to draw again
+  window.requestAnimationFrame(loop);
+
+};
+
+window.addEventListener("keydown", controller.keyListener)
+window.addEventListener("keyup", controller.keyListener);
+window.requestAnimationFrame(loop);
+    
+  
+
+</script>
+</section>
+    
+    <img id="Menu1" width="10" height="10" src="Menu1.png" style="display: none;">
+    <img id="Menu2" width="10" height="10" src="Menu2-3.png" style="display: none;">
+    
+    <img id="Background" width="10" height="10" src="Background3.jpg" style="display: none;">
+    <img id="Highway" width="10" height="10" src="Highway3.png" style="display: none;">
+    <img id="Mega" width="10" height="10" src="Mega.png" style="display: none;">
+    <img id="MegaUp" width="10" height="10" src="MegaUP.png" style="display: none;">
+    <img id="MegaShot" width="10" height="10" src="MegaShot.png" style="display: none;">
+    <img id="EnemyBot" width="10" height="10" src="MEnemy.png" style="display: none;">
+    
+</body>
+</html>
